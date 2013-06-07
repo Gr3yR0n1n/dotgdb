@@ -10,8 +10,14 @@ define nop
   end
 
   if $ARM == 1
+    if $_APPLE
+      set $_t_flag = $cpsr->t & 1
+    else
+      set $_t_flag = ($cpsr >> 5) & 1
+    endif
+
     if ($argc == 1)
-      if ($cpsr->t &1)
+      if $_t_flag
         # thumb
         set *(short *) $arg0 = 0x46c0
       else
@@ -20,7 +26,7 @@ define nop
       end
     else
       set $addr = $arg0
-      if ($cpsr->t & 1)
+      if $_t_flag
     	# thumb
 	while ($addr < $arg1)
 	  set *(short *) $addr = 0x46c0

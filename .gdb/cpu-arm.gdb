@@ -18,110 +18,152 @@ set $oldr15 = 0
 set $oldsp  = 0
 set $oldlr  = 0
 
+
+define _setflagsarm
+  if $_APPLE
+    set $_n_flag = $cspr->n & 1
+
+    # zero (Z), bit 30
+    set $_z_flag = $cspr->z & 1
+
+    # Carry/Borrow/Extend (C), bit 29
+    set $_c_flag = $cspr->c & 1
+
+    # Overflow (V), bit 28
+    set $_v_flag = $cspr->v & 1
+
+    # Sticky overflow (Q), bit 27
+    set $_q_flag = $cspr->q & 1
+
+    # Java state bit (J), bit 24
+    # When T=1:
+    # J = 0 The processor is in Thumb state.
+    # J = 1 The processor is in ThumbEE state.
+    set $_j_flag = $cspr->j & 1
+
+    # Data endianness bit (E), bit 9
+    set $_e_flag = $cspr->e & 1
+
+    # Imprecise abort disable bit (A), bit 8
+    # The A bit is set to 1 automatically. It is used to disable imprecise data aborts.
+    # It might not be writable in the Nonsecure state if the AW bit in the SCR register is reset.
+    set $_a_flag = $cspr->a & 1
+
+    # IRQ disable bit (I), bit 7
+    # When the I bit is set to 1, IRQ interrupts are disabled.
+    set $_i_flag = $cspr->i & 1
+
+    # FIQ disable bit (F), bit 6
+    # When the F bit is set to 1, FIQ interrupts are disabled.
+    # FIQ can be nonmaskable in the Nonsecure state if the FW bit in SCR register is reset.
+    set $_f_flag = $cspr->f & 1
+
+    # Thumb state bit (F), bit 5
+    # if 1 then the processor is executing in Thumb state or ThumbEE state depending on the J bit
+    set $_t_flag = $cspr->t & 1
+
+    # TODO: GE bit ?
+  else
+    set $_n_flag = ($cpsr >> 0x1F) & 1
+    set $_z_flag = ($cpsr >> 0x1E) & 1
+    set $_c_flag = ($cpsr >> 0x1D) & 1
+    set $_v_flag = ($cpsr >> 0x1C) & 1
+    set $_q_flag = ($cpsr >> 0x1B) & 1
+    set $_j_flag = ($cpsr >> 0x18) & 1
+    set $_e_flag = ($cpsr >> 0x9) & 1
+    set $_a_flag = ($cpsr >> 0x8) & 1
+    set $_i_flag = ($cpsr >> 0x7) & 1
+    set $_f_flag = ($cpsr >> 0x6) & 1
+    set $_t_flag = ($cpsr >> 0x5) & 1
+
+    # TODO: GE bit ?
+  end
+end
+
+
 define flagsarm
+  _setflagsarm
+
   # conditional flags are
   # negative/less than (N), bit 31 of CPSR
   # zero (Z), bit 30
   # Carry/Borrow/Extend (C), bit 29
   # Overflow (V), bit 28
   # negative/less than (N), bit 31 of CPSR
-  if ($cpsr->n & 1)
-    printf "N "
-    set $_n_flag = 1
+  if $_n_flag
+      printf "N "
   else
-    printf "n "
-    set $_n_flag = 0
+      printf "n "
   end
   # zero (Z), bit 30
-  if ($cpsr->z & 1)
+  if $_z_flag
     printf "Z "
-    set $_z_flag = 1
   else
     printf "z "
-    set $_z_flag = 0
   end
   # Carry/Borrow/Extend (C), bit 29
-  if ($cpsr->c & 1)
+  if $_c_flag
     printf "C "
-    set $_c_flag = 1
   else
     printf "c "
-    set $_c_flag = 0
   end
   # Overflow (V), bit 28
-  if ($cpsr->v & 1)
+  if $_v_flag
     printf "V "
-    set $_v_flag = 1
   else
     printf "v "
-    set $_v_flag = 0
   end
   # Sticky overflow (Q), bit 27
-  if ($cpsr->q & 1)
+  if $_q_flag
     printf "Q "
-    set $_q_flag = 1
   else
     printf "q "
-    set $_q_flag = 0
   end
   # Java state bit (J), bit 24
   # When T=1:
   # J = 0 The processor is in Thumb state.
   # J = 1 The processor is in ThumbEE state.
-  if ($cpsr->j & 1)
+  if $_j_flag
     printf "J "
-    set $_j_flag = 1
   else
     printf "j "
-    set $_j_flag = 0
   end
   # Data endianness bit (E), bit 9
-  if ($cpsr->e & 1)
+  if $_e_flag
     printf "E "
-    set $_e_flag = 1
   else
     printf "e "
-    set $_e_flag = 0
   end
   # Imprecise abort disable bit (A), bit 8
   # The A bit is set to 1 automatically. It is used to disable imprecise data aborts.
   # It might not be writable in the Nonsecure state if the AW bit in the SCR register is reset.
-  if ($cpsr->a & 1)
+  if $_a_flag
     printf "A "
-    set $_a_flag = 1
   else
     printf "a "
-    set $_a_flag = 0
   end
   # IRQ disable bit (I), bit 7
   # When the I bit is set to 1, IRQ interrupts are disabled.
-  if ($cpsr->i & 1)
+  if $_i_flag
     printf "I "
-    set $_i_flag = 1
   else
     printf "i "
-    set $_i_flag = 0
   end
   # FIQ disable bit (F), bit 6
   # When the F bit is set to 1, FIQ interrupts are disabled.
   # FIQ can be nonmaskable in the Nonsecure state if the FW bit in SCR register is reset.
-  if ($cpsr->f & 1)
+  if $_f_flag
     printf "F "
-    set $_f_flag = 1
   else
     printf "f "
-    set $_f_flag = 0
   end
   # Thumb state bit (F), bit 5
   # if 1 then the processor is executing in Thumb state or ThumbEE state depending on the J bit
-  if ($cpsr->t & 1)
+  if $_t_flag
     printf "T "
-    set $_t_flag = 1
   else
     printf "t "
-    set $_t_flag = 0
   end
-  # TODO: GE bit ?
 end
 document flagsarm
 Auxiliary function to set ARM cpu flags.
@@ -129,15 +171,27 @@ end
 
 
 define eflagsarm
-  printf "     N <%d>  Z <%d>  C <%d>  V <%d>", \
-         ($cpsr->n & 1), ($cpsr->z & 1), \
-	 ($cpsr->c & 1), ($cpsr->v & 1)
-  printf "  Q <%d>  J <%d>  GE <%d>  E <%d>  A <%d>", \
-         ($cpsr->q & 1), ($cpsr->j & 1), \
-	 ($cpsr->ge), ($cpsr->e & 1), ($cpsr->a & 1)
-  printf "  I <%d>  F <%d>  T <%d> \n", \
-         ($cpsr->i & 1), ($cpsr->f & 1), \
-	 ($cpsr->t & 1)
+  if $_APPLE
+    printf "     N <%d>  Z <%d>  C <%d>  V <%d>", \
+           ($cpsr->n & 1), ($cpsr->z & 1), \
+           ($cpsr->c & 1), ($cpsr->v & 1)
+    printf "  Q <%d>  J <%d>  GE <%d>  E <%d>  A <%d>", \
+           ($cpsr->q & 1), ($cpsr->j & 1), \
+           ($cpsr->ge), ($cpsr->e & 1), ($cpsr->a & 1)
+    printf "  I <%d>  F <%d>  T <%d> \n", \
+           ($cpsr->i & 1), ($cpsr->f & 1), \
+           ($cpsr->t & 1)
+  else
+    printf "     N <%d>  Z <%d>  C <%d>  V <%d>", \
+           (($cpsr >> 0x1F) & 1), (($cpsr >> 0x1E) & 1), \
+           (($cpsr >> 0x1D) & 1), (($cpsr >> 0x1C) & 1)
+    printf "  Q <%d>  J <%d>  GE <%d>  E <%d>  A <%d>", \
+           (($cpsr >> 0x1B) & 1), (($cpsr >> 0x18) & 1), \
+           (($cpsr >> 0x10) & 0xF), (($cpsr >> 9) & 1), (($cpsr >> 8) & 1)
+    printf "  I <%d>  F <%d>  T <%d> \n", \
+           (($cpsr >> 7) & 1), (($cpsr >> 6) & 1), \
+           (($cpsr >> 5) & 1)
+  end
 end
 document eflagsarm
 Auxillary function to print ARM eflags register.
@@ -152,9 +206,11 @@ end
 
 
 define regarm
+  _setflagsarm
+
   printf "  "
   echo \033[32m
-  printf "R0:"
+  printf " R0:"
   if $r0
     if ($r0 != $oldr0 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -165,7 +221,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R1:"
+  printf " R1:"
   if $r1
     if ($r1 != $oldr1 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -176,7 +232,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R2:"
+  printf " R2:"
   if $r2
     if ($r2 != $oldr2 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -187,7 +243,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R3:"
+  printf " R3:"
   if $r3
     if ($r3 != $oldr3 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -202,7 +258,7 @@ define regarm
   printf "\n  "
 
   echo \033[32m
-  printf "R4:"
+  printf " R4:"
   if $r4
     if ($r4 != $oldr4 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -213,7 +269,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R5:"
+  printf " R5:"
   if $r5
     if ($r5 != $oldr5 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -224,7 +280,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R6:"
+  printf " R6:"
   if $r6
     if ($r6 != $oldr6 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -235,7 +291,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R7:"
+  printf " R7:"
   if $r7
     if ($r7 != $oldr7 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -250,7 +306,7 @@ define regarm
   printf "\n  "
 
   echo \033[32m
-  printf "R8:"
+  printf " R8:"
   if $r8
     if ($r8 != $oldr8 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -261,7 +317,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "R9:"
+  printf " R9:"
   if $r9
     if ($r9 != $oldr9 && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -308,7 +364,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "SP:"
+  printf " SP:"
   if $sp
     if ($sp != $oldsp && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -319,7 +375,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "LR:"
+  printf " LR:"
   if $lr
     if ($lr != $oldlr && $SHOWREGCHANGES == 1)
       echo \033[31m
@@ -330,7 +386,7 @@ define regarm
   end
 
   echo \033[32m
-  printf "PC:"
+  printf " PC:"
   echo \033[0m
   if $pc
     printf "  0x%08X  ", $pc
@@ -482,11 +538,15 @@ end
 
 
 define cfnarm
-  set $tempflag = $cpsr->n
-  if ($tempflag & 1)
-    set $cpsr->n = $tempflag & ~0x1
+  if $_APPLE
+    set $tempflag = $cpsr->n
+    if ($tempflag & 1)
+      set $cpsr->n = $tempflag & ~0x1
+    else
+      set $cpsr->n = $tempflag | 0x1
+    end
   else
-    set $cpsr->n = $tempflag | 0x1
+    set $cpsr = $cpsr ^ (1 << 31)
   end
 end
 document cfnarm
@@ -496,25 +556,33 @@ end
 
 define cfcarm
   # Carry/Borrow/Extend (C), bit 29
-  set $tempflag = $cpsr->c
-  if ($tempflag & 1)
-    set $cpsr->c = $tempflag & ~0x1
+  if $_APPLE
+    set $tempflag = $cpsr->c
+    if ($tempflag & 1)
+      set $cpsr->c = $tempflag & ~0x1
+    else
+      set $cpsr->c = $tempflag | 0x1
+    end
   else
-    set $cpsr->c = $tempflag | 0x1
+    set $cpsr = $cpsr ^ (1 << 29)
   end
 end
-document cfc
+document cfcarm
 Auxiliary function to change ARM Carry Flag.
 end
 
 
 define cfzarm
   # zero (Z), bit 30
-  set $tempflag = $cpsr->z
-  if ($tempflag & 1)
-    set $cpsr->z = $tempflag & ~0x1
+  if $_APPLE
+    set $tempflag = $cpsr->z
+    if ($tempflag & 1)
+      set $cpsr->z = $tempflag & ~0x1
+    else
+      set $cpsr->z = $tempflag | 0x1
+    end
   else
-    set $cpsr->z = $tempflag | 0x1
+    set $cpsr = $cpsr ^ (1 << 30)
   end
 end
 document cfzarm
@@ -524,11 +592,15 @@ end
 
 # Overflow (V), bit 28
 define cfvarm
-  set $tempflag = $cpsr->v
-  if ($tempflag & 1)
-    set $cpsr->v = $tempflag & ~0x1
+  if $_APPLE
+    set $tempflag = $cpsr->v
+    if ($tempflag & 1)
+      set $cpsr->v = $tempflag & ~0x1
+    else
+      set $cpsr->v = $tempflag | 0x1
+    end
   else
-    set $cpsr->v = $tempflag | 0x1
+    set $cpsr = $cpsr ^ (1 << 28)
   end
 end
 document cfvarm

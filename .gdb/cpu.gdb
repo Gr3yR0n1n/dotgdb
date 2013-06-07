@@ -318,14 +318,13 @@ end
 
 
 define context
-  echo \033[34m
+  echo \033[34m\033[1m
   if $SHOWCPUREGISTERS == 1
     printf "----------------------------------------"
     printf "----------------------------------"
     if ($64BITS == 1)
       printf "---------------------------------------------"
     end
-    echo \033[34m\033[1m
     printf "[regs]\n"
     echo \033[0m
     reg
@@ -333,7 +332,7 @@ define context
   end
 
   if $SHOWSTACK == 1
-    echo \033[34m
+    echo \033[34m\033[1m
     if ($ARM == 1)
       printf "[0x%08X]---------", $sp
     end
@@ -346,13 +345,11 @@ define context
     if ($X86 == 1)
       printf "[0x%04X:0x%08X]--", $ss, $esp
     end
-    echo \033[34m
     printf "-------------------------"
     printf "-----------------------------"
     if ($64BITS == 1)
       printf "-------------------------------------"
     end
-    echo \033[34m\033[1m
     printf "[stack]\n"
     echo \033[0m
     set $context_i = $CONTEXTSIZE_STACK
@@ -393,12 +390,11 @@ define context
     # and now display it or not (we have no interest in having the info displayed after the call)
     if $__byte1 == 0xE8
       if $displayobjectivec == 1
-        echo \033[34m
+        echo \033[34m\033[1m
         printf "--------------------------------------------------------------------"
         if ($64BITS == 1)
           printf "---------------------------------------------"
         end
-    	echo \033[34m\033[1m
 	printf "[ObjectiveC]\n"
       	echo \033[0m\033[30m
       	x/s $objectivec
@@ -406,12 +402,11 @@ define context
       set $displayobjectivec = 0
     end
     if $displayobjectivec == 1
-      echo \033[34m
+      echo \033[34m\033[1m
       printf "--------------------------------------------------------------------"
       if ($64BITS == 1)
 	printf "---------------------------------------------"
       end
-      echo \033[34m\033[1m
       printf "[ObjectiveC]\n"
       echo \033[0m\033[30m
       x/s $objectivec
@@ -424,12 +419,11 @@ define context
     datawin
   end
 
-  echo \033[34m
+  echo \033[34m\033[1m
   printf "--------------------------------------------------------------------------"
   if ($64BITS == 1)
     printf "---------------------------------------------"
   end
-  echo \033[34m\033[1m
   printf "[code]\n"
   echo \033[0m
   set $context_i = $CONTEXTSIZE_CODE
@@ -447,7 +441,16 @@ define context
     x /i
     set $context_i--
   end
-  echo \033[34m
+  echo \033[34m\033[1m
+  printf "-----------------------------------------------------------------------"
+  if ($64BITS == 1)
+    printf "---------------------------------------------"
+  end
+  printf "[threads]\n"
+  echo \033[0m
+  info threads
+
+  echo \033[34m\033[1m
   printf "----------------------------------------"
   printf "----------------------------------------"
   if ($64BITS == 1)
