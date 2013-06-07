@@ -16,7 +16,7 @@ case "$TARGET_DOUBLET" in
         echo "set \$X86_64 = 1" >> $GDB_FILE;
         echo "set \$64BITS = 1" >> $GDB_FILE;
         ;;
-    *-arm*)
+    *-arm*|*-littlearm*|*-bigarm*)
         echo "set \$ARM = 1" >> $GDB_FILE;
         ;;
     *-*mips*)

@@ -14,10 +14,10 @@ define dumpjump
     # 12 bits for any immediate value
     # $_t_flag == 0 => ARM mode
     # $_t_flag == 1 => Thumb or ThumbEE
-    if ($cpsr->t & 1)
-      set $_t_flag = 1
+    if $_APPLE
+      set $_t_flag = $cpsr->t & 1
     else
-      set $_t_flag = 0
+      set $_t_flag = ($cpsr >> 5) & 1
     end
 
     if $_t_flag == 0
