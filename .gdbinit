@@ -108,6 +108,12 @@ define hook-core-file
 end
 
 
+define target hook-remote
+  # Attempt to detect the target again since a target connection has been made.
+  setup-detect-target
+end
+
+
 define hook-stop
   # Display instructions formats
   hookstopcpu
